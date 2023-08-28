@@ -1,6 +1,7 @@
 mod utils;
 
 use wasm_bindgen::prelude::*;
+extern crate js_sys;
 
 #[wasm_bindgen]
 extern "C" {
@@ -30,7 +31,7 @@ impl Universe {
 
         let cells = (0..width * height)
             .map(|c| {
-                if c % 2 == 0 || c % 7 == 0 {
+                if js_sys::Math::random() < 0.5 {
                     Cell::Alive
                 } else {
                     Cell::Dead
@@ -90,6 +91,18 @@ impl Universe {
             }
         }
         self.cells = next;
+    }
+
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+
+    pub fn cells(&self) -> *const Cell {
+        self.cells.as_ptr()
     }
 }
 
