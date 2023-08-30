@@ -1,2 +1,2 @@
 mod utils;
-mod models;
+pub mod models;

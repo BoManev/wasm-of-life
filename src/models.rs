@@ -22,8 +22,8 @@ pub struct Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn new() -> Self {
-        let width = 64;
-        let height = 64;
+        let width = 128;
+        let height = 128;
 
         let size = (width * height) as usize;
         let mut cells = FixedBitSet::with_capacity(size);
@@ -89,8 +89,28 @@ impl Universe {
         self.width
     }
 
+    pub fn set_width(&mut self, width: u32) {
+        self.width = width;
+        let size = (width * self.height) as usize;
+        self.cells = FixedBitSet::with_capacity(size);
+
+        for x in 0..size {
+            self.cells.set(x, Cell::Dead.into());
+        }
+    }
+
     pub fn height(&self) -> u32 {
         self.height
+    }
+
+    pub fn set_height(&mut self, height: u32) {
+        self.height = height;
+        let size = (self.width * height) as usize;
+        self.cells = FixedBitSet::with_capacity(size);
+
+        for x in 0..size {
+            self.cells.set(x, Cell::Dead.into());
+        }
     }
 
     pub fn cells(&self) -> *const u32 {
@@ -111,7 +131,25 @@ impl From<bool> for Cell {
     fn from(bool: bool) -> Self {
         match bool {
             true => Cell::Alive,
-            flase => Cell::Dead,
+            false => Cell::Dead,
+        }
+    }
+}
+
+impl From<Cell> for u32 {
+    fn from(cell: Cell) -> Self {
+        match cell {
+            Cell::Alive => 1,
+            Cell::Dead => 0,
+        }
+    }
+}
+
+impl From<u32> for Cell {
+    fn from(value: u32) -> Self {
+        match value {
+            1 => Cell::Alive,
+            _ => Cell::Dead,
         }
     }
 }
@@ -122,5 +160,18 @@ impl Cell {
             Cell::Dead => false,
             Cell::Alive => true,
         }
+    }
+}
+
+impl Universe {
+    pub fn get_cells(&self) -> Vec<Cell> {
+        self.cells.as_slice().iter().map(|c| (*c).into()).collect()
+    }
+
+    pub fn set_cells(&mut self, cell: &[(u32, u32)]) {
+        cell.iter().for_each(|(row, col)| {
+            let idx = self.get_index(*row, *col);
+            self.cells.set(idx, Cell::Alive.into());
+        });
     }
 }
